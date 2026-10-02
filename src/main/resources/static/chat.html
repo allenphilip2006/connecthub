@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ConnectHub Chat</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+
+        .container {
+            width: 500px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .status {
+            text-align: center;
+            color: green;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #chat {
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #fafafa;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .message {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 15px;
+            max-width: 70%;
+            font-size: 14px;
+        }
+
+        .sent {
+            background: #d1e7ff;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .received {
+            background: #e2e2e2;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: gray;
+            margin-top: 3px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>ConnectHub Private Chat</h2>
+
+    <div class="status" id="status"></div>
+
+    <div id="userInfo"></div>
+
+    <label>Chat With:</label>
+    <input type="text" id="receiver" placeholder="Enter friend email" />
+
+    <button onclick="connect()">Connect</button>
+
+    <div id="chat"></div>
+
+    <input type="text" id="message" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+
+</div>
+
+<script>
+
+    let stompClient = null;
+    let myEmail = "";
+
+    window.onload = function () {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Not logged in! Redirecting to login.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        myEmail = payload.sub;
+
+        document.getElementById("userInfo").innerHTML =
+            "<b>Logged in as:</b> " + myEmail;
+
+        showStatus("Login successful ✅");
+    };
+
+    function showStatus(text) {
+        document.getElementById("status").innerText = text;
+        setTimeout(() => {
+            document.getElementById("status").innerText = "";
+        }, 3000);
+    }
+
+    function connect() {
+
+        const receiver = document.getElementById("receiver").value;
+
+        if (!receiver) {
+            alert("Enter receiver email first!");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            { Authorization: 'Bearer ' + token },
+            function () {
+
+                showStatus("Connected to " + receiver + " 🔗");
+
+                stompClient.subscribe('/user/queue/messages', function (message) {
+
+                    const msg = JSON.parse(message.body);
+                    displayMessage(msg.sender, msg.content, msg.timestamp);
+                });
+
+                loadHistory();
+            }
+        );
+    }
+
+    function sendMessage() {
+
+        const receiver = document.getElementById("receiver").value;
+        const content = document.getElementById("message").value;
+
+        if (!content) return;
+
+        stompClient.send("/app/chat.send", {}, JSON.stringify({
+            receiver: receiver,
+            content: content
+        }));
+
+        document.getElementById("message").value = "";
+    }
+
+    function loadHistory() {
+
+        const receiver = document.getElementById("receiver").value;
+        const token = localStorage.getItem("token");
+
+        fetch("/api/chat/history/" + receiver, {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        })
+        .then(res => res.json())
+        .then(messages => {
+
+            document.getElementById("chat").innerHTML = "";
+
+            messages.forEach(msg => {
+                displayMessage(msg.sender, msg.content, msg.timestamp);
+            });
+        });
+    }
+
+    function displayMessage(sender, content, timestamp) {
+
+        const chat = document.getElementById("chat");
+        const div = document.createElement("div");
+
+        div.classList.add("message");
+
+        if (sender === myEmail) {
+            div.classList.add("sent");
+            div.innerHTML = "<b>You:</b> " + content;
+        } else {
+            div.classList.add("received");
+            div.innerHTML = "<b>Friend:</b> " + content;
+        }
+
+        const time = document.createElement("div");
+        time.classList.add("timestamp");
+        time.innerText = new Date(timestamp).toLocaleString();
+
+        div.appendChild(time);
+        chat.appendChild(div);
+
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // ✅ AUTO LOGOUT WHEN TAB CLOSES
+    window.onbeforeunload = function () {
+
+        if (stompClient) {
+            stompClient.disconnect();
+        }
+
+        localStorage.removeItem("token");
+    };
+
+</script>
+
+</body>
+</html>

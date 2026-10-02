@@ -1,0 +1,72 @@
+# Build output
+target/
+frontend/dist/
+frontend/dist-ssr/
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Secrets & local config — NEVER commit
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+src/main/resources/application-local.properties
+**/serviceAccountKey.json
+**/*firebase*adminsdk*.json
+**/*.pem
+**/*.p12
+**/*.jks
+**/*.keystore
+
+# User uploads & runtime data
+uploads/
+C:/connecthub/uploads/
+
+# Logs & debug artifacts
+*.log
+backend_log.txt
+boot.log
+boot_error.log
+boot_success.log
+build.log
+compile_errors.txt
+frontend/dev_log.txt
+frontend/lint_errors.txt
+frontend/lint_results*.json
+frontend/lint_subset.json
+frontend/parsed_lint*.txt
+frontend/parse_lint.*
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.project
+.classpath
+.settings/
+.sts4-cache
+.apt_generated
+.factorypath
+.springBeans
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven wrapper jar (downloaded on first run)
+.mvn/wrapper/maven-wrapper.jar
+
+# Accidental root-level npm files (frontend has its own package.json)
+/package.json
+/package-lock.json
+
+# Misc
+*.local
+HELP.md
+run_instructions.md
