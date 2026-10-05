@@ -46,20 +46,26 @@ function Login() {
       navigate("/home");
     } catch (err) {
       const status = err?.response?.data?.status;
+      const unreachable = !err?.response;
       setEmotion('shocked', 3000)
       showBubble("That's not right! 😱 Try again?", 3000)
-      addToast("Invalid credentials. Please try again.", "error");
       setTimeout(() => {
         setEmotion('thinking', 2000)
         showBubble('Forgot your password? 🤔', 2000)
       }, 3000);
 
-      if (status === "2fa_required") {
+      if (unreachable) {
+        addToast("Can't reach the API. The live site needs VITE_API_URL pointing at a running backend.", "error");
+        setError("Can't reach the server. This deployed app is not connected to a live API.");
+      } else if (status === "2fa_required") {
+        addToast("Two-factor code required.", "error");
         setTwoFactorRequired(true);
         setError("Enter your two-factor code.");
       } else if (status === "invalid_2fa") {
+        addToast("Invalid two-factor code.", "error");
         setError("Invalid two-factor code.");
       } else {
+        addToast("Invalid credentials. Please try again.", "error");
         setError("Invalid email or password. Please try again.");
       }
     } finally {

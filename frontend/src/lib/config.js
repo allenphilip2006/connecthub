@@ -1,5 +1,6 @@
 const DEFAULT_DEV_API = 'http://localhost:62223';
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || DEFAULT_DEV_API).replace(/\/$/, '');
+const configured = import.meta.env.VITE_API_URL;
+export const API_BASE_URL = (configured || (import.meta.env.PROD ? '' : DEFAULT_DEV_API)).replace(/\/$/, '');
 export const API_URL = `${API_BASE_URL}/api`;
 export const WS_URL = `${API_BASE_URL}/ws`;
 export const mediaUrl = (path) => {

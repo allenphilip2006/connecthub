@@ -36,7 +36,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class StoryService {
-    private static final String STORY_DIR = "C:/connecthub/uploads/story/";
+    @org.springframework.beans.factory.annotation.Value("${connecthub.story.upload-dir:./uploads/story/}")
+    private String STORY_DIR;
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
     private final FollowerRepository followerRepository;

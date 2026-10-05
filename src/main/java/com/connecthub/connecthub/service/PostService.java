@@ -34,7 +34,8 @@ import com.connecthub.connecthub.repository.PostHashtagRepository;
 @Service
 public class PostService {
 
-    private static final String UPLOAD_DIR = "C:/connecthub/uploads/";
+    @org.springframework.beans.factory.annotation.Value("${connecthub.post.upload-dir:./uploads/}")
+    private String UPLOAD_DIR;
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;

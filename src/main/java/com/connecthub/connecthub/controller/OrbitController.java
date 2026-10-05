@@ -11,7 +11,8 @@ import java.util.Map;
 @RequestMapping("/api/orbit")
 public class OrbitController {
 
-    private static final String ORBIT_DIR = "C:/connecthub/uploads/orbit/";
+    @org.springframework.beans.factory.annotation.Value("${connecthub.orbit.upload-dir:./uploads/orbit/}")
+    private String ORBIT_DIR;
 
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {

@@ -27,7 +27,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final FollowerRepository followerRepository;
 
-    @Value("${connecthub.chat.upload-dir:C:/connecthub/uploads/chat/}")
+    @Value("${connecthub.chat.upload-dir:./uploads/chat/}")
     private String CHAT_MEDIA_DIR;
 
     public ChatService(ConversationRepository conversationRepository,

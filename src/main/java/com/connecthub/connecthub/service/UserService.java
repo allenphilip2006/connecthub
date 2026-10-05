@@ -21,7 +21,8 @@ import org.springframework.data.domain.PageRequest;
 @Service
 public class UserService {
 
-    private static final String PROFILE_DIR = "C:/connecthub/uploads/profile/";
+    @org.springframework.beans.factory.annotation.Value("${connecthub.profile.upload-dir:./uploads/profile/}")
+    private String PROFILE_DIR;
 
     private final UserRepository userRepository;
     private final FollowerRepository followerRepository;

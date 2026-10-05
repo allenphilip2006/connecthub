@@ -23,7 +23,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+        const url = error.config?.url || '';
+        const isAuthCall = url.includes('/users/login') || url.includes('/users/register');
+        if (status === 401 && !isAuthCall) {
             localStorage.removeItem('token');
             window.location.href = '/login';
         }
